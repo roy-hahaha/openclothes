@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClothes</title>
+    <style>
+        /* Style the navigation bar */
+        body{
+            color: rgb(54, 75, 145);
+        }
+        .navbar {
+            color: rgb(54, 75, 145);
+        }
+
+        /* Navbar links */
+        .navbar a {
+            float: left;
+            display: block;
+            color: rgb(54, 75, 145);
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+
+        /* Links - change color on hover */
+        .navbar a:hover {
+            background-color: #ddd;
+            color: rgb(54, 75, 145);
+        }
+
+        /* Links - change color on hover */
+        .navbar a:hover {
+            background-color: #ddd;
+            color: rgb(54, 75, 145);
+            font-weight: bold;
+        }
+
+        .banner {
+            z-index: -1; /* Set the z-index to make sure the banner is behind the content */
+        }
+        .banner img {
+            height: 300px; /* Set the height of the image */
+            width: 100%; /* Set the width of the image */
+            object-fit: cover; /* Resize the image to cover the entire area */
+        }
+
+        .slogan {
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .editor-pick {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            color: rgba(199, 202, 214, 1);
+        }
+        .product {
+            margin: 10px;
+            padding: 10px;
+            width: 30%;
+            text-align: center;
+        }
+
+        .image-container img {
+            height: 200px;
+            width: 200px;
+            object-fit: cover;
+        }
+        
+        .secondary-button {
+            float: right;
+            text-decoration: none;
+            color: #333;
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            padding: 6px 10px;
+            margin-bottom: 2px;
+            font-size: 14px;
+            border-radius: 4px;
+            transition: background-color 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+        .secondary-button:hover {
+            background-color: #e2e3e5;
+            border-color: #c6c8ca;
+        }
+
+        #store{
+            margin: 0;
+            background-color: rgb(89, 117, 148);
+            color: white;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="#home"><i>OpenClothes</i></a>
+        <a href="#news">News</a>
+        <a href="#contact">Contact</a>
+        <a href="#about">About</a>
+        <a href="/accounts/login/" class="secondary-button" style="float: right;">Shop Owners</a>
+    </div>
+    <div class="banner">
+        <img src="{% static 'images/summer.jpg' %}" alt="banner">
+    </div>
+    <div class='slogan'>
+        <h2>Summer Edition</h2>
+    </div>
+    <h2 style="margin-left: 20px; color: rgba(199, 202, 214, 1);">Editor's Pick</h2>
+    <div class="editor-pick">
+        <div class="product">
+            <div class="image-container">
+                <img src="{% static 'images/clothes1.jpg' %}" alt="summer1">
+            </div>
+            <h3>S' ewir</h3>
+        </div>
+        <div class="product">
+            <div class="image-container">
+                <img src="{% static 'images/clothes2.jpg' %}" alt="summer2">
+            </div>
+            <h3>Summer Vibes</h3>
+        </div>
+        <div class="product">
+            <div class="image-container">
+                <img src="{% static 'images/clothes3.jpg' %}" alt="summer3">
+            </div>
+            <h3>Summer Breeze</h3>
+        </div>
+    </div>
+    <div id="store"></div>
+</body>
+<script>
+        // When the user scroll down the page, execute getMoreClothes()
+        window.onscroll = function(ev) {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                getMoreStore();
+            }
+        }
+
+        let timesFetch = 0;
+        
+        // Function to get more clothes
+        function getMoreStore() {
+            // Loading effect
+            let loading = document.createElement('div');
+            loading.innerHTML = 'Loading...';
+            document.body.appendChild(loading);
+
+            timesFetch++;
+
+            // Avoid fetching more clothes if the server is already fetching
+            if (document.getElementById('loading')) {
+                return;
+            }
+
+            // Fetch clothes from the server
+            fetch('/store/', 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    timesFetch: timesFetch
+                })
+            }
+            )
+            .then(response => response.json())
+            .then(data => {
+                // Remove the loading effect
+                document.body.removeChild(loading);
+
+                let store = data.stores;
+                let storeDiv = document.getElementById('store');
+                for (let i = 0; i < store.length; i++) {
+                    let div = document.createElement('div');
+                    div.className = 'product';
+                    let imageContainer = document.createElement('div');
+                    imageContainer.className = 'image-container';
+                    let image = document.createElement('img');
+                    image.src = '/media/' + store[i].image;
+                    image.alt = store[i].name;
+                    imageContainer.appendChild(image);
+                    div.appendChild(imageContainer);
+                    let h3 = document.createElement('h3');
+                    h3.innerHTML = store[i].name;
+                    div.appendChild(h3);
+                    storeDiv.appendChild(div);
+                }
+            });
+        }  
+    </script>
+</html>
