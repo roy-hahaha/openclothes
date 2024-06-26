@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Your Store{% endblock %}
+
+{% block styles %}
+    <style>
+        label {
+            font-weight: bold;
+        }
+    .form {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: .5rem;
+        color: #333;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="file"],
+    .form-group textarea {
+        width: 100%;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="file"]:focus,
+    .form-group textarea:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+    }
+
+    .form-group input[type="submit"] {
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border-radius: .25rem;
+        cursor: pointer;
+        transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .form-group input[type="submit"]:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+</style>
+{% endblock %}
+    
+{% block content %}
+    <div class="header">Create Store</div>
+    <form action="{% url 'create_store' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="store_name">Store Name:</label><br>
+        <input type="text" id="store_name" name="store_name" required><br><br>
+        <label for="description">Store Description:</label><br>
+        <textarea id="description" name="description" required></textarea><br><br>
+        <label for="location">Location:</label><br>
+        <input type="text" id="location" name="location" required><br><br>
+        <label for="image">Store Image:</label><br>
+        <input type="file" id="image" name="image" accept="image/*"><br><br>
+        <input type="submit" value="Create Store">
+    </form>
+</div>
+{% endblock %}

@@ -1,11 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate
+from django.shortcuts import get_object_or_404
 
 # Assuming you have a Clothes model
-from .models import Store
+from .models import Store, Selfie
+from .forms import SelfieForm
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
@@ -14,8 +19,79 @@ def index(request):
 def login(request):
     return render(request, 'login.html')
 
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            if user is not None:
+                login(request, user)  # Correct usage of login()
+            return redirect('login')  # Redirect to a desired page after signup
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+
+# Display selfie ideas
+def ideas(request):
+    # Load all selfies from the database
+    selfies = Selfie.objects.all()
+    return render(request, 'ideas.html', {'selfies': selfies})
+
+@login_required
+def selfie(request):
+    if request.method == 'POST':
+        form = SelfieForm(request.POST, request.FILES)
+        if form.is_valid():
+            selfie_instance = form.save(commit=False)  # Save the form temporarily without committing to the database
+            selfie_instance.user = request.user  # Set the user to the current logged-in user
+            selfie_instance.save()  # Now save the form with the user set
+            return redirect('/') 
+        else:
+            # Form is not valid, render the page with form errors
+            print(form.errors)
+            return render(request, 'selfie.html', {'form': form})
+        
+    else:
+        form = SelfieForm()
+    return render(request, 'selfie.html', {'form': form})
+
+@login_required
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    try:
+        store = Store.objects.get(user=request.user)
+        stores = [store]
+    except Store.DoesNotExist:
+        store = None
+    return render(request, 'dashboard.html', {'stores': stores})
+
+@login_required
+def create_store(request):
+    if request.method == 'POST':
+        store_name = request.POST.get('store_name')
+        description = request.POST.get('description')
+        location = request.POST.get('location')
+        image = request.FILES.get('image')
+
+        # Create a new store object
+        store = Store(user=request.user, store_name=store_name, description=description, location=location, image=image)
+        store.save()
+
+        return redirect('dashboard')  
+    return render(request, 'create_store.html')
+
+def store_detail(request, store_id):
+    store = Store.objects.get(id=store_id)
+    return render(request, 'store_detail.html', {'store': store})
+
+def search_stores(request):
+    query = request.GET.get('query', '')
+    if query:
+        stores = Store.objects.filter(store_name__icontains=query)[:5]
+        results = [{'store_name': store.store_name, 'store_id': store.id} for store in stores]
+        print(results)
+        return JsonResponse(results, safe=False)
+    return JsonResponse([])
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -35,7 +111,7 @@ def store(request):
 
     # Serialize the clothes data
     # Adjust the fields according to your Clothes model
-    store_data = list(store_queryset.values('id', 'name', 'description', 'image'))
+    store_data = list(store_queryset.values('id', 'store_name', 'description', 'image'))
 
     # Return the serialized data as JSON
     return JsonResponse({'stores': store_data})

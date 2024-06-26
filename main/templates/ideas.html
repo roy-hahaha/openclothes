@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .item img {
+        width: auto;
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Ideas</h2>
+    <div class="item">
+        {% for selfie in selfies %}
+        <div class="product">
+            <div class="image-container">
+                <img src="{{ selfie.image.url }}" alt="Selfie Image">
+            </div>
+            <p>{{ selfie.review }}</p>
+            <a href="/store/{{selfie.store.id}}"><p>#{{ selfie.store }}</p></a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

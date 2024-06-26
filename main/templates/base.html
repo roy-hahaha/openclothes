@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Base Page{% endblock %}</title>
+    <style>
+        body {
+            color: rgb(54, 75, 145);
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            color: rgb(54, 75, 145);
+        }
+        .navbar a {
+            float: left;
+            color: rgb(54, 75, 145);
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: rgb(54, 75, 145);
+            font-weight: bold;
+        }
+        .secondary-button {
+            text-decoration: none;
+            color: #333;
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            padding: 6px 10px;
+            margin-bottom: 2px;
+            font-size: 14px;
+            border-radius: 4px;
+            transition: background-color 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+        .secondary-button:hover {
+            background-color: #e2e3e5;
+            border-color: #c6c8ca;
+        }
+        .content {
+            margin: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: rgb(54, 75, 145);
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            font-size: 20px;
+            color: rgba(199, 202, 214, 1);
+        }
+        .item {
+            background-color: #fff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <div class="navbar">
+        <a href="/"><i>OpenClothes</i></a>
+        <a href="/ideas">Ideas</a>
+        <a href="#contact">Contact</a>
+        <a href="#about">About</a>
+        <a href="/accounts/login/" class="secondary-button" style="float: right;">Shop Owners</a>
+        <a href="/selfie" class="secondary-button" style="float: right; margin:0 5px;">Selfie</a>
+    </div>
+    <div class="content">
+        {% block content %}
+        <!-- Content goes here -->
+        {% endblock %}
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

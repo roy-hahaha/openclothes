@@ -9,6 +9,8 @@
         /* Style the navigation bar */
         body{
             color: rgb(54, 75, 145);
+            display: flex;
+            flex-direction: column;
         }
         .navbar {
             color: rgb(54, 75, 145);
@@ -93,7 +95,6 @@
 
         #store{
             margin: 0;
-            background-color: rgb(89, 117, 148);
             color: white;
             display: flex;
             flex-direction: row;
@@ -105,14 +106,13 @@
 </head>
 <body>
     <div class="navbar">
-        <a href="#home"><i>OpenClothes</i></a>
-        <a href="#news">News</a>
+        <a href="/"><i>OpenClothes</i></a>
+        <a href="/ideas">Ideas</a>
         <a href="#contact">Contact</a>
         <a href="#about">About</a>
-        <a href="/accounts/login/" class="secondary-button" style="float: right;">Shop Owners</a>
-    </div>
-    <div class="banner">
-        <img src="{% static 'images/summer.jpg' %}" alt="banner">
+        <a href="/accounts/login/" class="secondary-button" style="float: right;">Your Shop?</a>
+        <a href="/selfie" class="secondary-button" style="float: right; margin:0 5px;">Selfie</a>
+
     </div>
     <div class='slogan'>
         <h2>Summer Edition</h2>
@@ -138,68 +138,85 @@
             <h3>Summer Breeze</h3>
         </div>
     </div>
+    <h2 style="margin-left: 20px; color: rgba(199, 202, 214, 1);">Store</h2>
     <div id="store"></div>
 </body>
 <script>
-        // When the user scroll down the page, execute getMoreClothes()
-        window.onscroll = function(ev) {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                getMoreStore();
-            }
+    let isFetching = false; // Flag to indicate fetch operation in progress
+    let timesFetch = 0;
+
+    // Debounce function to limit how often a function is executed
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Modified scroll event handler with debounce
+    window.onscroll = debounce(function(ev) {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10 && !isFetching) { // Added check for isFetching
+            getMoreStore();
         }
+    }, 100); // Debounce time of 100 milliseconds
+    
+    // Function to get more clothes
+    function getMoreStore() {
+        if (isFetching) return; // Return if already fetching
+        isFetching = true; // Set fetching flag
 
-        let timesFetch = 0;
-        
-        // Function to get more clothes
-        function getMoreStore() {
-            // Loading effect
-            let loading = document.createElement('div');
-            loading.innerHTML = 'Loading...';
-            document.body.appendChild(loading);
+        // Loading effect
+        let loading = document.createElement('div');
+        loading.innerHTML = 'Loading...';
+        loading.style.textAlign = 'center';
+        document.body.appendChild(loading);
 
-            timesFetch++;
+        timesFetch++;
 
-            // Avoid fetching more clothes if the server is already fetching
-            if (document.getElementById('loading')) {
-                return;
+        // Fetch clothes from the server
+        fetch('/store/', 
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                timesFetch: timesFetch
+            })
+        }
+        )
+        .then(response => response.json())
+        .then(data => {
+            // Remove the loading effect
+            document.body.removeChild(loading);
+
+            let store = data.stores;
+            let storeDiv = document.getElementById('store');
+            for (let i = 0; i < store.length; i++) {
+                let div = document.createElement('div');
+                div.className = 'product';
+                let imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+                let link = document.createElement('a');
+                link.href = '/store/' + store[i].id; // Replace with the appropriate URL for the store description
+                let image = document.createElement('img');
+                image.src = '/media/' + store[i].image;
+                image.alt = store[i].store_name;
+                link.appendChild(image);
+                imageContainer.appendChild(link);
+                div.appendChild(imageContainer);
+                let h3 = document.createElement('h3');
+                h3.innerHTML = store[i].store_name;
+                div.appendChild(h3);
+                storeDiv.appendChild(div);
             }
-
-            // Fetch clothes from the server
-            fetch('/store/', 
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    timesFetch: timesFetch
-                })
-            }
-            )
-            .then(response => response.json())
-            .then(data => {
-                // Remove the loading effect
-                document.body.removeChild(loading);
-
-                let store = data.stores;
-                let storeDiv = document.getElementById('store');
-                for (let i = 0; i < store.length; i++) {
-                    let div = document.createElement('div');
-                    div.className = 'product';
-                    let imageContainer = document.createElement('div');
-                    imageContainer.className = 'image-container';
-                    let image = document.createElement('img');
-                    image.src = '/media/' + store[i].image;
-                    image.alt = store[i].name;
-                    imageContainer.appendChild(image);
-                    div.appendChild(imageContainer);
-                    let h3 = document.createElement('h3');
-                    h3.innerHTML = store[i].name;
-                    div.appendChild(h3);
-                    storeDiv.appendChild(div);
-                }
-            });
-        }  
-    </script>
+        });
+    }  
+</script>
 </html>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Sign Up{% endblock %}
 
 {% block styles %}
 <style>
@@ -31,7 +31,7 @@
     .container form input[type="text"],
     .container form input[type="password"],
     .container form input[type="email"] {
-        width: calc(60% - 20px); /* Adjust width, subtracting padding */
+        width: calc(100% - 20px); /* Adjust width, subtracting padding */
         padding: 10px; /* Add some padding inside the input box */
         margin-bottom: 20px; /* Add some space below each input */
         border: 1px solid #ccc; /* Add a border to the input */
@@ -49,17 +49,28 @@
 </style>
 {% endblock %}
 
-
 {% block content %}
 <div class="container mt-5">
-    <h2>Login</h2>
+    <h2>Sign Up</h2>
     <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="mb-3">
-            {{ form.as_p }}
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="alert alert-danger">
+                            {% for error in field.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </p>
+            {% endfor %}
         </div>
-        <p>Don't have an account? <a href="/accounts/signup/">Register</a></p>
-        <button type="submit" class="secondary-button">Login</button>
+        <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+        <button type="submit" class="secondary-button">Sign Up</button>
     </form>
 </div>
 {% endblock %}

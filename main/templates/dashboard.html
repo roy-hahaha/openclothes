@@ -1,11 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Store</h2>
+    {% for store in stores %}
+        <div class="item">
+            <i><a href="/store/{{store.id}}/">{{ store.store_name }}</a></i>
+        </div>
+    {% endfor %}
+    {% if stores|length == 0 %}
+        <p>No stores found</p>
+    {% endif %}
+    <a href="/store/create/" class="secondary-button">Add Store</a>
+</div>
+{% endblock %}
