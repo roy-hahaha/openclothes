@@ -23,6 +23,14 @@
 </div>
 <div class="section">
     <h2>Manage Products</h2>
-    <a href="/product/create/" class="secondary-button">Add Product</a>
+    {% for product in products %}
+    <div class="item">
+        <p><b>Product Name:</b> {{ product.name }}</p>
+        <p><b>Description:</b> {{ product.description }}</p>
+        <p><b>Price:</b> ${{ product.price }}</p>
+        <img src="{{ product.image.url }}" alt="Product Image">
+    </div>
+    {% endfor %}
+    <a href="/product/create/{{store.id}}" class="secondary-button">Add Product</a>
 </div>
 {% endblock %}

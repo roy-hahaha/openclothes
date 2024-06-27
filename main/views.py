@@ -6,9 +6,11 @@ import json
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden
 
 # Assuming you have a Clothes model
-from .models import Store, Selfie
+from .models import Store, Selfie, Clothes
 from .forms import SelfieForm
 from django.contrib.auth.decorators import login_required
 
@@ -36,6 +38,15 @@ def ideas(request):
     # Load all selfies from the database
     selfies = Selfie.objects.all()
     return render(request, 'ideas.html', {'selfies': selfies})
+
+
+def profile(request, id):
+    if id is None:
+        selfies = Selfie.objects.filter(user=request.user)
+    else:
+        user = get_object_or_404(User, id=id)
+        selfies = Selfie.objects.filter(user=user)
+    return render(request, 'profile.html', {'selfies': selfies})
 
 @login_required
 def selfie(request):
@@ -81,7 +92,31 @@ def create_store(request):
 
 def store_detail(request, store_id):
     store = Store.objects.get(id=store_id)
-    return render(request, 'store_detail.html', {'store': store})
+    products = Clothes.objects.filter(store=store)
+    return render(request, 'store_detail.html', {'store': store, 'products': products})
+
+
+@login_required
+def create_product(request, store_id):
+    store = Store.objects.get(id=store_id)
+
+    # Check if the current user is the owner of the store
+    if store.user != request.user:
+        # If not, return a forbidden response or redirect
+        return HttpResponseForbidden("You are not allowed to create products for this store.")
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        image = request.FILES.get('image')
+
+        # Create a new clothes object
+        clothes = Clothes(store=store, name=name, description=description, price=price, image=image)
+        clothes.save()
+
+        return redirect('store_detail', store_id=store_id)  
+    return render(request, 'create_product.html')
 
 def search_stores(request):
     query = request.GET.get('query', '')

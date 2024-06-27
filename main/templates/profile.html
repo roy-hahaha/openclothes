@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}My Profile{% endblock %}
 
 {% block styles %}
 <style>
@@ -33,15 +33,17 @@
 
         div .item {
             width: 30%;
+            margin: 10px;
+            padding: 10px;
         }
     }
 
 </style>
 {% endblock %}
 
-{% block content %}
-<h2>Ideas</h2>
 
+{% block content %}
+<h2>Profile</h2>
 <div class="section">
     {% for selfie in selfies %}
     <div class="item">
